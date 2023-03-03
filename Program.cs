@@ -1,12 +1,17 @@
-using System.Text.Json.Serialization;
-using GoldMedalBackend.Models;
+using gold_medal_backend.Hubs;
+using gold_medal_backend.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -14,20 +19,16 @@ builder.Services.AddDbContext<DataContext>(options => options.UseSqlite(builder.
 builder.Services.AddCors(options =>
             {
                 options.AddPolicy(name: "Hubs",
-                    builder =>
+                    cors =>
                     {
-                        builder
+                        cors
                             .AllowAnyMethod()
                             .AllowAnyHeader()
-                            .WithOrigins("http://localhost:3000","https://incredible-churros-bdccc4.netlify.app")
+                            .WithOrigins(builder.Configuration.GetSection("allowedOrigins").Get<string[]>())
                             .AllowCredentials();
                     });
             });
 builder.Services.AddSignalR();
-// builder.Services.AddMvc().AddJsonOptions(options => 
-// {
-//     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-// });
 
 var app = builder.Build();
 
@@ -41,8 +42,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
 app.MapControllers();
+app.MapHub<MedalsHub>("/medalsHub");
 
 app.UseCors("Hubs");
 
