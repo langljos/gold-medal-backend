@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/73c3870c-b7ad-4d61-97da-0ff5054df876/resourceGroups/appsvc_windows_centralus/providers/Microsoft.Web/sites/jlanglois-olympic-medals",
+    "appService.deploySubpath": "publish"
+}
