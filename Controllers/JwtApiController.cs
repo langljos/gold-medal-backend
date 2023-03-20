@@ -41,12 +41,20 @@ namespace gold_medal_backend.Controllers
         // http post member to collection
         [HttpPost, ProducesResponseType(typeof(Country), 201)]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult<Country>> Post([FromBody] Country country) {
-            _dataContext.Add(country);
+        public async Task<ActionResult<Country>> Post([FromBody] CountryDto country) {
+            var result = await _dataContext.AddCountry(new Country
+            {
+                Name = country.Name,
+                GoldMedalCount = country.GoldMedalCount,
+                SilverMedalCount = country.SilverMedalCount,
+                BronzeMedalCount = country.BronzeMedalCount
+            });
+            
+            _dataContext.Add(result);
             await _dataContext.SaveChangesAsync();
             await _hubContext.Clients.All.SendAsync("ReceiveAddMessage", country);
             this.HttpContext.Response.StatusCode = 201;
-            return country;
+            return result;
         } 
 
         // http delete member from collection
