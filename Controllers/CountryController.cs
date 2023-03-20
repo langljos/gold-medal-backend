@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using gold_medal_backend.Hubs;
 using gold_medal_backend.Models;
+using gold_medal_backend.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+
 
 namespace gold_medal_backend.Controllers
 {
@@ -14,60 +13,53 @@ namespace gold_medal_backend.Controllers
     public class CountryController : ControllerBase
     {
         private readonly ILogger<CountryController> _logger;
-        private DataContext _dataContext;
-        private readonly IHubContext<MedalsHub> _hubContext;
+        private readonly DataContext _dataContext;
 
-        public CountryController(ILogger<CountryController> logger, DataContext db, IHubContext<MedalsHub> hubContext)
+        private readonly ICountryRepository _countryRepository;
+
+        public CountryController(ILogger<CountryController> logger, DataContext db, ICountryRepository countryRepository)
         {
             _dataContext = db;
             _logger = logger;
-            _hubContext = hubContext;
+            
+            _countryRepository = countryRepository;
         }
 
         [HttpGet("{id}")]
-        public Task<Country?> Get(int id)
+        public Task<Country?> GetSpecificCountry(int id)
         {
-            return _dataContext.Country.FindAsync(id).AsTask();
+            return _countryRepository.GetSpecificCountry(id);
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Country>> Get()
+        public Task<IEnumerable<Country>> GetAllCountries()
         {
-            return await _dataContext.Country.ToArrayAsync();
+            return _countryRepository.GetAllCountries();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CountryDto country)
+        public IActionResult CreateNewCountry([FromBody] CountryDto country)
         {
-            var result = await _dataContext.AddCountry(new Country
-            {
-                Name = country.Name,
-                GoldMedalCount = country.GoldMedalCount,
-                SilverMedalCount = country.SilverMedalCount,
-                BronzeMedalCount = country.BronzeMedalCount
-            });
-
-            await _hubContext.Clients.All.SendAsync("ReceiveAddMessage", country);
-
-            return Created($"/api/country/{result.Id}", result);
+            
+            var result = _countryRepository.CreateNewCountry(country);
+             _logger.LogInformation("<<<<<<<<<<<<<<<<<<<Result: {0}", result);
+            return Created($"/api/country/{result}", country);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public Task<NoContentResult> DeleteCountry(int id)
         {
-            await _dataContext.DeleteCountry(id);
-            await _hubContext.Clients.All.SendAsync("ReceiveDeleteMessage", id);
-            return NoContent();
+            _countryRepository.DeleteCountry(id);
+            return Task.FromResult(NoContent());
         }
 
         [HttpPatch("{id}"), ProducesResponseType(typeof(Country), 204)]
         // update country (specific fields)
-        public async Task<ActionResult> Patch(int id, [FromBody] JsonPatchDocument<Country> patch)
+        public IActionResult PatchCountry(int id, [FromBody] JsonPatchDocument<Country> patch)
         {
-            var country = await _dataContext.PatchCountry(id, patch);
-            if (country is not null)
+            var isTrue = _countryRepository.PatchCountry(id, patch).Result;
+            if (isTrue)
             {
-                await _hubContext.Clients.All.SendAsync("ReceivePatchMessage", country);
                 return NoContent();
             }
             return NotFound();
