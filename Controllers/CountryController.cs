@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using gold_medal_backend.Models;
@@ -44,7 +45,7 @@ namespace gold_medal_backend.Controllers
         public IActionResult CreateNewCountry([FromBody] CountryDto country)
         {
             var resultId = _countryRepository.CreateNewCountry(country);
-            return Created($"/api/country/{resultId}", country);
+            return Created($"/api/country/{resultId.Result}", country);
         }
 
         [HttpDelete("{id}")]

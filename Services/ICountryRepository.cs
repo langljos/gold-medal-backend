@@ -17,7 +17,7 @@ namespace gold_medal_backend.Services
     {
         Task<Country?> GetSpecificCountry(int id);
         Task<IEnumerable<Country>> GetAllCountries();
-        Task<Int32> CreateNewCountry([FromBody] CountryDto country);
+        Task<int> CreateNewCountry([FromBody] CountryDto country);
         void DeleteCountry(int id);
         Task<bool> PatchCountry(int id, [FromBody] JsonPatchDocument<Country> patch);
     }
@@ -44,7 +44,7 @@ namespace gold_medal_backend.Services
             return await _dataContext.Country.ToArrayAsync();
          }
 
-         public async Task<Int32> CreateNewCountry([FromBody] CountryDto countryDto)
+         public async Task<int> CreateNewCountry([FromBody] CountryDto countryDto)
          {
             var result = await _dataContext.AddCountry(new Country
             {
@@ -53,7 +53,7 @@ namespace gold_medal_backend.Services
                 SilverMedalCount = countryDto.SilverMedalCount,
                 BronzeMedalCount = countryDto.BronzeMedalCount
             });
-
+            
             await _hubContext.Clients.All.SendAsync("ReceiveAddMessage", result);
             return result.Id;
          }
