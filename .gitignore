@@ -396,3 +396,17 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+.idea/.idea.gold-medal-backend.dir/.idea/indexLayout.xml
+.vscode/launch.json
+.vscode/tasks.json
+appdb.sqlite
+appdb.sqlite-shm
+appdb.sqlite-wal
+appdb.sqlite
+appsettings.json
+appsettings.json
+appdb.sqlite
+.idea/.idea.gold-medal-backend.dir/.idea/vcs.xml
+.idea/.idea.gold-medal-backend.dir/.idea/encodings.xml
+.idea/.idea.gold-medal-backend.dir/.idea/dataSources.xml
+appdb.sqlite
