@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using gold_medal_backend.Models;
 using gold_medal_backend.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -25,35 +27,36 @@ namespace gold_medal_backend.Controllers
             _countryRepository = countryRepository;
         }
 
+        [HttpGet]
+        public Task<IEnumerable<Country>> GetAllCountries()
+        {
+            return _countryRepository.GetAllCountries();
+        }
+        
         [HttpGet("{id}")]
         public Task<Country?> GetSpecificCountry(int id)
         {
             return _countryRepository.GetSpecificCountry(id);
         }
 
-        [HttpGet]
-        public Task<IEnumerable<Country>> GetAllCountries()
-        {
-            return _countryRepository.GetAllCountries();
-        }
-
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public IActionResult CreateNewCountry([FromBody] CountryDto country)
         {
-            
-            var result = _countryRepository.CreateNewCountry(country);
-             _logger.LogInformation("<<<<<<<<<<<<<<<<<<<Result: {0}", result);
-            return Created($"/api/country/{result}", country);
+            var resultId = _countryRepository.CreateNewCountry(country);
+            return Created($"/api/country/{resultId}", country);
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public Task<NoContentResult> DeleteCountry(int id)
         {
             _countryRepository.DeleteCountry(id);
             return Task.FromResult(NoContent());
         }
 
-        [HttpPatch("{id}"), ProducesResponseType(typeof(Country), 204)]
+        [HttpPatch("{id}")]
+        [Authorize(Roles = "admin")]
         // update country (specific fields)
         public IActionResult PatchCountry(int id, [FromBody] JsonPatchDocument<Country> patch)
         {

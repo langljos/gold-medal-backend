@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 using gold_medal_backend.Hubs;
 using Microsoft.AspNetCore.JsonPatch;
 using gold_medal_backend.Controllers;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.Extensions.Logging;
 
 namespace gold_medal_backend.Services
@@ -20,7 +21,6 @@ namespace gold_medal_backend.Services
         void DeleteCountry(int id);
         Task<bool> PatchCountry(int id, [FromBody] JsonPatchDocument<Country> patch);
     }
-
     public class CountryRepository: ICountryRepository
     {
          private readonly DataContext _dataContext;
@@ -44,22 +44,17 @@ namespace gold_medal_backend.Services
             return await _dataContext.Country.ToArrayAsync();
          }
 
-         public async Task<Int32> CreateNewCountry([FromBody] CountryDto country)
+         public async Task<Int32> CreateNewCountry([FromBody] CountryDto countryDto)
          {
             var result = await _dataContext.AddCountry(new Country
             {
-                Name = country.Name,
-                GoldMedalCount = country.GoldMedalCount,
-                SilverMedalCount = country.SilverMedalCount,
-                BronzeMedalCount = country.BronzeMedalCount
+                Name = countryDto.Name,
+                GoldMedalCount = countryDto.GoldMedalCount,
+                SilverMedalCount = countryDto.SilverMedalCount,
+                BronzeMedalCount = countryDto.BronzeMedalCount
             });
 
             await _hubContext.Clients.All.SendAsync("ReceiveAddMessage", result);
-
-
-            _logger.LogInformation("<<<<<<<<<<<<<<<<<<<Result: {0}", result.Id);
-           
-
             return result.Id;
          }
 

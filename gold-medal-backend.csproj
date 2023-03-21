@@ -28,6 +28,11 @@
     <_ContentIncludedByDefault Remove="publish\publish\appsettings.json" />
     <_ContentIncludedByDefault Remove="publish\publish\gold-medal-backend.deps.json" />
     <_ContentIncludedByDefault Remove="publish\publish\gold-medal-backend.runtimeconfig.json" />
+    <_ContentIncludedByDefault Remove="publish\web.config" />
+    <_ContentIncludedByDefault Remove="publish\appsettings.Development.json" />
+    <_ContentIncludedByDefault Remove="publish\appsettings.json" />
+    <_ContentIncludedByDefault Remove="publish\gold-medal-backend.deps.json" />
+    <_ContentIncludedByDefault Remove="publish\gold-medal-backend.runtimeconfig.json" />
   </ItemGroup>
 
 </Project>
